@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+        <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+        <link rel="stylesheet" href="css/qgis2web.css">
+        <link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/MarkerCluster.css">
+        <link rel="stylesheet" href="css/MarkerCluster.Default.css">
+        <link rel="stylesheet" href="css/leaflet-measure.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/L.Control.Layers.Tree.min.js"></script>
+        <script src="js/L.Control.Locate.min.js"></script>
+        <script src="js/multi-style-layer.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-measure.js"></script>
+        <script src="js/leaflet.markercluster.js"></script>
+        <script src="data/ROUTES_1.js"></script>
+        <script src="data/Terrain_2.js"></script>
+        <script src="data/Zonesagricoles_3.js"></script>
+        <script src="data/batiments_4.js"></script>
+        <script src="data/Marchs_5.js"></script>
+        <script src="data/ROND_point_6.js"></script>
+        <script>
+        var map = L.map('map', {
+            zoomControl:false, maxZoom:28, minZoom:1
+        }).fitBounds([[-11.702916534590544,43.25388835353317],[-11.700543145334358,43.25853810062829]]);
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        // remove popup's row if "visible-with-data"
+        function removeEmptyRowsFromPopupContent(content, feature) {
+         var tempDiv = document.createElement('div');
+         tempDiv.innerHTML = content;
+         var rows = tempDiv.querySelectorAll('tr');
+         for (var i = 0; i < rows.length; i++) {
+             var td = rows[i].querySelector('td.visible-with-data');
+             var key = td ? td.id : '';
+             if (td && td.classList.contains('visible-with-data') && feature.properties[key] == null) {
+                 rows[i].parentNode.removeChild(rows[i]);
+             }
+         }
+         return tempDiv.innerHTML;
+        }
+        // add class to format popup if it contains media
+		function addClassToPopupIfMedia(content, popup) {
+			var tempDiv = document.createElement('div');
+			tempDiv.innerHTML = content;
+			if (tempDiv.querySelector('td img')) {
+				popup._contentNode.classList.add('media');
+					// Delay to force the redraw
+					setTimeout(function() {
+						popup.update();
+					}, 10);
+			} else {
+				popup._contentNode.classList.remove('media');
+			}
+		}
+        var zoomControl = L.control.zoom({
+            position: 'topleft'
+        }).addTo(map);
+        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
+        var measureControl = new L.Control.Measure({
+            position: 'topleft',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'sqmeters',
+            secondaryAreaUnit: 'hectares'
+        });
+        measureControl.addTo(map);
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].innerHTML = '';
+        document.getElementsByClassName('leaflet-control-measure-toggle')[0].className += ' fas fa-ruler';
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+        }
+        map.createPane('pane_OSMStandard_0');
+        map.getPane('pane_OSMStandard_0').style.zIndex = 400;
+        var layer_OSMStandard_0 = L.tileLayer('http://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            pane: 'pane_OSMStandard_0',
+            opacity: 1.0,
+            attribution: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors, CC-BY-SA</a>',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 19
+        });
+        layer_OSMStandard_0;
+        map.addLayer(layer_OSMStandard_0);
+        function pop_ROUTES_1(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['route'] !== null ? autolinker.link(feature.properties['route'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ROUTES_1_0() {
+            return {
+                pane: 'pane_ROUTES_1',
+                opacity: 1,
+                color: 'rgba(146,56,56,1.0)',
+                dashArray: '',
+                lineCap: 'round',
+                lineJoin: 'bevel',
+                weight: 3.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_ROUTES_1');
+        map.getPane('pane_ROUTES_1').style.zIndex = 401;
+        map.getPane('pane_ROUTES_1').style['mix-blend-mode'] = 'normal';
+        var layer_ROUTES_1 = new L.geoJson(json_ROUTES_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ROUTES_1',
+            layerName: 'layer_ROUTES_1',
+            pane: 'pane_ROUTES_1',
+            onEachFeature: pop_ROUTES_1,
+            style: style_ROUTES_1_0,
+        });
+        bounds_group.addLayer(layer_ROUTES_1);
+        map.addLayer(layer_ROUTES_1);
+        function pop_Terrain_2(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['terrain'] !== null ? autolinker.link(feature.properties['terrain'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Terrain_2_0() {
+            return {
+                pane: 'pane_Terrain_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(37,129,37,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Terrain_2');
+        map.getPane('pane_Terrain_2').style.zIndex = 402;
+        map.getPane('pane_Terrain_2').style['mix-blend-mode'] = 'normal';
+        var layer_Terrain_2 = new L.geoJson(json_Terrain_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Terrain_2',
+            layerName: 'layer_Terrain_2',
+            pane: 'pane_Terrain_2',
+            onEachFeature: pop_Terrain_2,
+            style: style_Terrain_2_0,
+        });
+        bounds_group.addLayer(layer_Terrain_2);
+        map.addLayer(layer_Terrain_2);
+        function pop_Zonesagricoles_3(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Zone agri'] !== null ? autolinker.link(feature.properties['Zone agri'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        var pattern_Zonesagricoles_3_0 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.0,
+            color: '#68a220',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 315
+        });
+        pattern_Zonesagricoles_3_0.addTo(map);
+        function style_Zonesagricoles_3_0() {
+            return {
+                pane: 'pane_Zonesagricoles_3',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Zonesagricoles_3_0,
+                interactive: true,
+            }
+        }
+        var pattern_Zonesagricoles_3_1 = new L.StripePattern({
+            weight: 0.3,
+            spaceWeight: 2.0,
+            color: '#68a220',
+            opacity: 1.0,
+            spaceOpacity: 0,
+            angle: 225
+        });
+        pattern_Zonesagricoles_3_1.addTo(map);
+        function style_Zonesagricoles_3_1() {
+            return {
+                pane: 'pane_Zonesagricoles_3',
+                stroke: false,
+                fillOpacity: 1,
+                fillPattern: pattern_Zonesagricoles_3_1,
+                interactive: true,
+            }
+        }
+        function style_Zonesagricoles_3_2() {
+            return {
+                pane: 'pane_Zonesagricoles_3',
+                opacity: 1,
+                color: 'rgba(104,162,32,1.0)',
+                dashArray: '',
+                lineCap: 'square',
+                lineJoin: 'bevel',
+                weight: 2.0,
+                fillOpacity: 0,
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Zonesagricoles_3');
+        map.getPane('pane_Zonesagricoles_3').style.zIndex = 403;
+        map.getPane('pane_Zonesagricoles_3').style['mix-blend-mode'] = 'normal';
+        var layer_Zonesagricoles_3 = new L.geoJson.multiStyle(json_Zonesagricoles_3, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Zonesagricoles_3',
+            layerName: 'layer_Zonesagricoles_3',
+            pane: 'pane_Zonesagricoles_3',
+            onEachFeature: pop_Zonesagricoles_3,
+            styles: [style_Zonesagricoles_3_0,style_Zonesagricoles_3_1,style_Zonesagricoles_3_2,]
+        });
+        bounds_group.addLayer(layer_Zonesagricoles_3);
+        map.addLayer(layer_Zonesagricoles_3);
+        function pop_batiments_4(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['batiments'] !== null ? autolinker.link(feature.properties['batiments'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_batiments_4_0() {
+            return {
+                pane: 'pane_batiments_4',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(237,198,100,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_batiments_4');
+        map.getPane('pane_batiments_4').style.zIndex = 404;
+        map.getPane('pane_batiments_4').style['mix-blend-mode'] = 'normal';
+        var layer_batiments_4 = new L.geoJson(json_batiments_4, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_batiments_4',
+            layerName: 'layer_batiments_4',
+            pane: 'pane_batiments_4',
+            onEachFeature: pop_batiments_4,
+            style: style_batiments_4_0,
+        });
+        bounds_group.addLayer(layer_batiments_4);
+        map.addLayer(layer_batiments_4);
+        function pop_Marchs_5(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">id</th>\
+                        <td>' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <td colspan="2">' + (feature.properties['Marchés'] !== null ? autolinker.link(feature.properties['Marchés'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_Marchs_5_0() {
+            return {
+                pane: 'pane_Marchs_5',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/Marchs_5.svg',
+            iconSize: [12.92, 12.92]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_Marchs_5');
+        map.getPane('pane_Marchs_5').style.zIndex = 405;
+        map.getPane('pane_Marchs_5').style['mix-blend-mode'] = 'normal';
+        var layer_Marchs_5 = new L.geoJson(json_Marchs_5, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_Marchs_5',
+            layerName: 'layer_Marchs_5',
+            pane: 'pane_Marchs_5',
+            onEachFeature: pop_Marchs_5,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_Marchs_5_0(feature));
+            },
+        });
+        var cluster_Marchs_5 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+            spiderfyDistanceMultiplier: 2});
+        cluster_Marchs_5.addLayer(layer_Marchs_5);
+
+        bounds_group.addLayer(layer_Marchs_5);
+        cluster_Marchs_5.addTo(map);
+        function pop_ROND_point_6(feature, layer) {
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">id</th>\
+                        <td>' + (feature.properties['id'] !== null ? autolinker.link(feature.properties['id'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">rond_point</th>\
+                        <td>' + (feature.properties['rond_point'] !== null ? autolinker.link(feature.properties['rond_point'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+			layer.on('popupopen', function(e) {
+				addClassToPopupIfMedia(content, e.popup);
+			});
+			layer.bindPopup(content, { maxHeight: 400 });
+        }
+
+        function style_ROND_point_6_0() {
+            return {
+                pane: 'pane_ROND_point_6',
+        rotationAngle: 0.0,
+        rotationOrigin: 'center center',
+        icon: L.icon({
+            iconUrl: 'markers/ROND_point_6.svg',
+            iconSize: [13.68, 13.68]
+        }),
+                interactive: true,
+            }
+        }
+        map.createPane('pane_ROND_point_6');
+        map.getPane('pane_ROND_point_6').style.zIndex = 406;
+        map.getPane('pane_ROND_point_6').style['mix-blend-mode'] = 'normal';
+        var layer_ROND_point_6 = new L.geoJson(json_ROND_point_6, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_ROND_point_6',
+            layerName: 'layer_ROND_point_6',
+            pane: 'pane_ROND_point_6',
+            onEachFeature: pop_ROND_point_6,
+            pointToLayer: function (feature, latlng) {
+                var context = {
+                    feature: feature,
+                    variables: {}
+                };
+                return L.marker(latlng, style_ROND_point_6_0(feature));
+            },
+        });
+        var cluster_ROND_point_6 = new L.MarkerClusterGroup({showCoverageOnHover: false,
+            spiderfyDistanceMultiplier: 2});
+        cluster_ROND_point_6.addLayer(layer_ROND_point_6);
+
+        bounds_group.addLayer(layer_ROND_point_6);
+        cluster_ROND_point_6.addTo(map);
+        var overlaysTree = [
+            {label: '<img src="legend/ROND_point_6.png" /> ROND_point', layer: cluster_ROND_point_6},
+            {label: '<img src="legend/Marchs_5.png" /> Marchés', layer: cluster_Marchs_5},
+            {label: '<img src="legend/batiments_4.png" /> batiments', layer: layer_batiments_4},
+            {label: '<img src="legend/Zonesagricoles_3.png" /> Zones agricoles', layer: layer_Zonesagricoles_3},
+            {label: '<img src="legend/Terrain_2.png" /> Terrain', layer: layer_Terrain_2},
+            {label: '<img src="legend/ROUTES_1.png" /> ROUTES', layer: layer_ROUTES_1},
+            {label: "OSM Standard", layer: layer_OSMStandard_0},]
+        var lay = L.control.layers.tree(null, overlaysTree,{
+            //namedToggle: true,
+            //selectorBack: false,
+            //closedSymbol: '&#8862; &#x1f5c0;',
+            //openedSymbol: '&#8863; &#x1f5c1;',
+            //collapseAll: 'Collapse all',
+            //expandAll: 'Expand all',
+            collapsed: true,
+        });
+        lay.addTo(map);
+        setBounds();
+        var i = 0;
+        layer_Zonesagricoles_3.eachLayer(function(layer) {
+            var context = {
+                feature: layer.feature,
+                variables: {}
+            };
+            layer.bindTooltip((layer.feature.properties['Zone agri'] !== null?String('<div style="color: #323232; font-size: 10pt; font-family: \'Open Sans\', sans-serif;">' + layer.feature.properties['Zone agri']) + '</div>':''), {permanent: true, offset: [-0, -16], className: 'css_Zonesagricoles_3'});
+            labels.push(layer);
+            totalMarkers += 1;
+              layer.added = true;
+              addLabel(layer, i);
+              i++;
+        });
+        resetLabels([layer_Terrain_2,layer_Zonesagricoles_3]);
+        map.on("zoomend", function(){
+            resetLabels([layer_Terrain_2,layer_Zonesagricoles_3]);
+        });
+        map.on("layeradd", function(){
+            resetLabels([layer_Terrain_2,layer_Zonesagricoles_3]);
+        });
+        map.on("layerremove", function(){
+            resetLabels([layer_Terrain_2,layer_Zonesagricoles_3]);
+        });
+        </script>
+    </body>
+</html>

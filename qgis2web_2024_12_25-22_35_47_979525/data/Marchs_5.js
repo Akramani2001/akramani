@@ -1,0 +1,1 @@
+var json_Marchs_5 = {"type":"FeatureCollection","name":"Marchs_5","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"id":null,"Marchés":"sara market"},"geometry":{"type":"Point","coordinates":[43.255869098890152,-11.701111856462598]}}]}
